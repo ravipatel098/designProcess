@@ -1,24 +1,15 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import MultipageForms from './Component/MultipageForm.web';
+import ApiData from './Component/ApiData.web';
+import CrudData from './Component/CrudData';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {/* <MultipageForms navigation={undefined} id={''} /> */}
+      <ApiData navigation={undefined} id={''} />
+      {/* <CrudData navigation={undefined} id={''} /> */}
     </div>
   );
 }
