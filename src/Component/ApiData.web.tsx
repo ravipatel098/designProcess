@@ -318,21 +318,22 @@ export default class ApiData extends ApiDataController {
         );
     }
 
-    renderFormSectionName = (formSectionName: string) => {
+    renderFormSectionName = (formSectionName: string, note: string) => {
         return (
             <Box sx={webStyle.noOfDraw}>
                 <FormSectionName data-testid="formSectionNameTextId">{formSectionName}</FormSectionName>
+                {note && <Typography>B</Typography>}
             </Box>
         );
     }
 
-    renderApplicantButton = () => {
+    renderApplicantButton = (item: any, index: number) => {
         return (
             <Box sx={webStyle.prioritiesAddButtonApplicant}>
                 <ApplicantPrioritiesText>{configJSON.applicantsHeading}</ApplicantPrioritiesText>
                 <PriotiesButton
                     data-testid="applicantModalButtonTestId"
-                    onClick={this.applicantModalShow}
+                    onClick={() => this.applicantModalShow(index)}
                 >{configJSON.addApplicantsButtonText}</PriotiesButton>
                 <Box sx={{ width: "300px" }}></Box>
             </Box>
@@ -626,53 +627,67 @@ export default class ApiData extends ApiDataController {
         )
     }
 
+    renderAshtricShow = () => {
+        return (
+            <Box style={{ display: "flex" }}>
+                <Typography style={webStyle.astrix}>{configJSON.astrick}</Typography>
+            </Box>
+        );
+    }
+
     render() {
         return (
             // Customizable Area Start
-            <Box sx={webStyle.formContainerDashbaord}>
+            <Box style={{ width: "75%", margin: "auto" }}>
                 <form
                     data-testid="formSubmitTestId"
                     onSubmit={this.handleSubmit}
                 >
                     {this.state.sortedFormSection.map((item: any, mainIndex: number) => {
-                        let isMultiple = item?.attributes?.multiple;
                         return (
-                            <Box key={mainIndex} >
+                            <Box key={mainIndex} style={{ padding: "20px", border: "2px solid black", margin: "20px" }}>
                                 <Box key={mainIndex}>
                                     <Box key={mainIndex} sx={webStyle.priotiMain}>
                                         {
                                             !item.attributes.multiple &&
                                                 item.attributes.name == "Priorities" ?
-                                                this.renderAddPrioritiesButton(item.attributes.name)
-                                                : item.attributes.multiple ? this.editDelete(item, mainIndex) : this.renderFormSectionName(item.attributes.name)
+                                                this.renderAddPrioritiesButton(item.attributes.name) :
+                                                item.attributes.multiple ?
+                                                    this.editDelete(item, mainIndex) :
+                                                    this.renderFormSectionName(item.attributes.name, item.attributes.note)
                                         }
                                         {!item.attributes.multiple &&
                                             <NoteMessageText>{item.attributes.note}</NoteMessageText>
                                         }
-                                        {item.attributes.form_fields.data.map((fielItemValue: any, index: number) => {
-                                            return (
-                                                <Box key={index} sx={webStyle.pageFirstInput}
-                                                    data-testid="checkBoxTestId"
-                                                >
-                                                    {fielItemValue.attributes.field_type !== "checkbox" && (
-                                                        <FormFieldName>
-                                                            <div style={{ display: "flex" }}>
-                                                                <div style={{ width: "30%" }}>
-                                                                    {fielItemValue.attributes.field_name}
-                                                                </div>
-                                                                <div style={{ width: "70%" }}>
-                                                                    {item.attributes.multiple ? ` - ${fielItemValue.attributes.field_value}` : ""}
-                                                                </div>
-                                                            </div>
-                                                        </FormFieldName>
-                                                    )}
-                                                    {!item.attributes.multiple &&
-                                                        this.renderAllFunction(fielItemValue, configJSON, mainIndex, index)
-                                                    }
-                                                </Box>
-                                            )
-                                        })}
-                                        {item.attributes.name === "Priorities" && this.renderApplicantButton()}
+                                        <Box>
+                                            {item.attributes.form_fields.data.map((fielItemValue: any, index: number) => {
+                                                return (
+                                                    <Box key={index} sx={webStyle.pageFirstInput}
+                                                        data-testid="checkBoxTestId"
+                                                    >
+                                                        {fielItemValue.attributes.field_type !== "checkbox" && (
+                                                            <Box sx={webStyle.fieldNameValue}>
+                                                                <Box sx={webStyle.addNameValue}>
+                                                                    <FormFieldName>
+                                                                        {fielItemValue.attributes.field_name}
+                                                                    </FormFieldName>
+                                                                    {fielItemValue.attributes.required && this.renderAshtricShow()}
+                                                                </Box>
+                                                                <Box sx={webStyle.addNameValue}>
+                                                                    <FormFieldName>
+                                                                        {item.attributes.multiple ? ` - ${fielItemValue.attributes.field_value}` : ""}
+                                                                    </FormFieldName>
+                                                                </Box>
+                                                            </Box>
+                                                        )}
+                                                        {!item.attributes.multiple &&
+                                                            this.renderAllFunction(fielItemValue, configJSON, mainIndex, index)
+                                                        }
+                                                    </Box>
+                                                )
+                                            })}
+                                        </Box>
+                                        {item.attributes.name === "Priorities" && this.renderApplicantButton(item, mainIndex)}
                                     </Box>
                                 </Box>
                             </Box>
@@ -729,6 +744,16 @@ const webStyle = {
         border: "none",
         backgroundColor: "rgb(98, 0, 238)",
     },
+    fieldNameValue: {
+        display: "flex",
+        alignItems: "center"
+    },
+    addNameValue: {
+        width: "50%",
+        display: "flex",
+        alignItems: "center",
+        flexDirection: "column"
+    },
     boxStyle: {
         maxWidth: '620px',
         margin: '0 auto',
@@ -753,7 +778,7 @@ const webStyle = {
     },
     priotiMain: {
         borderRadius: "10px",
-        border: "1px solid #D7D7D7",
+        border: "1px solid grey",
         backgroundColor: "#FFF",
         marginBottom: "20px",
         padding: "20px",
@@ -762,13 +787,21 @@ const webStyle = {
             marginLeft: "0px"
         }
     },
+    check: {
+        display: "flex",
+        border: "1px solid red"
+    },
+    ui: {
+        display: "flex",
+        flexDirection: "column"
+    },
     noOfDraw: {
         width: "100%",
         borderBottom: "1px solid #D7D7D7",
         paddingBottom: "5px",
         display: "flex",
-        justifyContent: "space-between",
-        alignItem: "center"
+        alignItem: "center",
+        flexDirection: "column"
     },
     prioritiesAddButton: {
         width: "70%",

@@ -126,6 +126,7 @@ interface StateType {
     applicanformModalVisible: boolean;
     sortedFormSection: Array<object>;
     formFilteredData: Array<object>;
+    applicantBeforeIndex: number;
     formModalFilterData: Array<object>;
     floatValue: string;
     floatValueError: boolean;
@@ -208,6 +209,7 @@ export default class MultipageFormsController extends Component<
             applicanformModalVisible: false,
             sortedFormSection: [],
             formFilteredData: [],
+            applicantBeforeIndex: NaN,
             formModalFilterData: [],
             floatValue: "",
             floatValueError: false,
@@ -314,10 +316,11 @@ export default class MultipageFormsController extends Component<
         });
     };
 
-    applicantModalShow = () => {
+    applicantModalShow = (index: number) => {
         let currentModalData = this.state.formFilteredData;
         this.setState({
             applicanformModalVisible: true,
+            applicantBeforeIndex: index
         }, () => {
             let modal = JSON.stringify(currentModalData);
             localStorage.setItem("modalCurrentData", modal);
@@ -388,12 +391,18 @@ export default class MultipageFormsController extends Component<
 
     handleCheckBoxChange = (inputField: { target: { value: string } }, mainIndex: number, fieldIndex: number) => {
         const { value } = inputField.target;
-
         let currentData = this.state.sortedFormSection;
         let mainIndexData: any = currentData[mainIndex];
-        let indexData: any = mainIndexData?.attributes.form_fields.data[fieldIndex].attributes;
-        indexData["field_value"] = value;
-        this.setState({ sortedFormSection: currentData });
+        let copyDataCheck = mainIndexData.attributes.form_fields.data[0].attributes.copy_data;
+        if (copyDataCheck) {
+            let data: any = currentData[mainIndex - 1]
+            currentData.splice(mainIndex + 1, 0, data);
+            this.setState({ sortedFormSection: currentData });
+        } else {
+            let indexData: any = mainIndexData?.attributes.form_fields.data[fieldIndex].attributes;
+            indexData["field_value"] = value;
+            this.setState({ sortedFormSection: currentData });
+        }
     };
 
     handleModalSubmit = () => {
@@ -422,8 +431,10 @@ export default class MultipageFormsController extends Component<
 
         if (allFieldsFilled) {
             let sortedFormModal = this.state.sortedFormSection;
-            let modalData = [...sortedFormModal, ...isMultiFormModalValidation];
-            this.setState({ sortedFormSection: modalData }, () => {
+            let asd = isMultiFormModalValidation[0]
+            let asdddd = this.state.applicantBeforeIndex + 1;
+            sortedFormModal.splice(asdddd, 0, asd)
+            this.setState({ sortedFormSection: sortedFormModal }, () => {
                 this.setState({ applicanformModalVisible: false });
             });
         }
